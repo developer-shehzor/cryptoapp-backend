@@ -1,6 +1,7 @@
 const Joi = require('joi');
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
+const UserDTO = require('../dto/user');
 
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,25}$/;
 
@@ -64,10 +65,72 @@ const authController = {
 
         const user = await userToRegister.save();
 
+        const userDto = new UserDTO(user);
+
         // 6. response send
-        return res.status(201).json({user})
+        return res.status(201).json({user: userDto});
     },
-    async login() {},
+
+    async login(req, res, next) {
+
+        // 1. validate user input
+        // we expect input data to be in such shape
+        const userLoginSchema = Joi.object({
+            username: Joi.string().min(5).max(30).required(),
+            password: Joi.string().pattern(passwordPattern)
+        });
+
+        // 2. if validation error, return error
+        const { error } = userLoginSchema.validate(req.body);
+
+        if (error) {
+            return next(error)
+        }
+
+        // 3. match username and password
+
+        const { username, password } = req.body;
+
+        // const username = req.body.username;
+        // const password = req.body.password;
+
+        let user;
+
+        try {
+            // match username
+            user = await User.findOne({username: username})
+
+            if (!user) {
+                const error = {
+                    status: 401,
+                    message: 'Invalid username'
+                }
+
+                return next(error);
+            }
+
+            // match passowrd
+            // req.body.password -> hash -> match
+
+            const match = await bcrypt.compare(password, user.password);
+
+            if (!match) {
+                const error = {
+                    status: 401,
+                    message: 'Invalid password'
+                }
+
+                return next(error);
+            }
+        } 
+        catch (error) {
+            return next(error);
+        }
+
+        const userDto = new UserDTO(user);
+        // 4. return response
+        return res.status(200).json({user: userDto});
+    },
 }
 
 module.exports = authController;

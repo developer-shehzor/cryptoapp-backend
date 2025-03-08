@@ -4,8 +4,7 @@ const authController = require('../controller/authController')
 
 const router = express.Router();
 
-// testing
-router.get('/test', (req, res) => res.json({msg: 'Working!'}))
+
 // user
 
 
