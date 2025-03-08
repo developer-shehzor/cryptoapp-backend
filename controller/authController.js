@@ -74,7 +74,7 @@ const authController = {
             user = await userToRegister.save();
 
             // token generation 
-            accessToken = JWTService.signAccessToken({_id: user._id, username: user.username}, '30m');
+            accessToken = JWTService.signAccessToken({_id: user._id}, '30m');
 
             refreshToken = JWTService.signRefreshToken({_id: user._id}, '60m');
         }
@@ -99,7 +99,7 @@ const authController = {
         const userDto = new UserDTO(user);
 
         // 6. response send
-        return res.status(201).json({user: userDto});
+        return res.status(201).json({user: userDto, auth: true});
     },
 
     async login(req, res, next) {
@@ -187,7 +187,7 @@ const authController = {
 
         const userDto = new UserDTO(user);
         // 4. return response
-        return res.status(200).json({user: userDto});
+        return res.status(200).json({user: userDto, auth: true});
     },
 }
 
