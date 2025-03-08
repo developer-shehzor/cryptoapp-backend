@@ -21,9 +21,11 @@
   "homepage": "https://github.com/developer-shehzor/cryptoapp-backend#readme",
   "dependencies": {
     "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^16.4.7",
     "express": "^4.21.1",
     "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.1"
   }
 }
