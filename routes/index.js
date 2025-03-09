@@ -16,7 +16,9 @@ router.post('/register', authController.register);
 
 // logout
 router.post('/logout', auth, authController.logout);
+
 // refresh
+router.get('/refresh', authController.refresh);
 
 // blog
 // CRUD
