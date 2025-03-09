@@ -3,6 +3,9 @@ const fs = require('fs');
 const Blog = require('../models/blog');
 const { BACKEND_SERVER_PATH } = require('../config/index');
 const BlogDTO = require('../dto/blog');
+const BlogDetailsDTO = require('../dto/blog-details');
+
+const mongodbIdPattern = /^[0-9a-fA-F]{24}$/;
 
 const blogController = {
     async create(req, res, next){
@@ -10,8 +13,6 @@ const blogController = {
         // 2. handle photo storage, naming
         // 3. add to db
         // 4. return responses
-
-        const mongodbIdPattern = /^[0-9a-fA-F]{24}$/;
 
         // photo from client side -> base64 encoded string -> decode -> store in backend -> save photo's path in db
         const createBlogSchema = Joi.object({
@@ -80,7 +81,35 @@ const blogController = {
             return next(error);
         }
     },
-    async getById(req, res, next){},
+    async getById(req, res, next){
+        // 1. validate id
+        
+        const getByIdSchema = Joi.object({
+            id: Joi.string().regex(mongodbIdPattern).required()
+        });
+
+        const { error } = getByIdSchema.validate(req.params);
+
+        if (error){
+            return next(error);
+        }
+
+        let blog;
+
+        const { id } = req.params
+
+        try {
+            blog = await Blog.findOne({_id: id}).populate('author')
+        }
+        catch(error) {
+            return next(error);
+        }
+
+        const blogDto = new BlogDetailsDTO(blog);
+
+        // response
+        return res.status(200).json({blog: blogDto});
+    },
     async update(req, res, next){},
     async delete(req, res, next){},
 }
